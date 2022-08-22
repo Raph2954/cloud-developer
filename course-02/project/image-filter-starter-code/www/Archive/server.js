@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
+const util_1 = require("./util/util");
 (() => __awaiter(void 0, void 0, void 0, function* () {
     // Init the Express application
     const app = (0, express_1.default)();
@@ -35,11 +36,24 @@ const body_parser_1 = __importDefault(require("body-parser"));
     // RETURNS
     //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
     /**************************************************************************** */
+    app.get("/filteredimage/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        let { image_url } = req.query;
+        if (!image_url) {
+            return res.status(422)
+                .send(`Unprocessable entity`);
+        }
+        else {
+            (0, util_1.filterImageFromURL)(image_url).then((result) => {
+                res.sendFile(result);
+                res.on(`finish`, () => (0, util_1.deleteLocalFiles)([result]));
+            }).catch((err) => res.status(422).send(err));
+        }
+    }));
     //! END @TODO1
     // Root Endpoint
     // Displays a simple message to the user
     app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        res.send("try GET /filteredimage?image_url={{https://upload.wikimedia.org/wikipedia/commons/b/bd/Golden_tabby_and_white_kitten_n01.jpg}}");
+        res.send("try GET /filteredimage?image_url={{}}");
     }));
     // Start the Server
     app.listen(port, () => {
